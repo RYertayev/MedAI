@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedAI Assistant — Чат</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#050607;
+      --border:rgba(255,255,255,.08);
+      --border2:rgba(255,255,255,.10);
+      --text:#eef2ff;
+      --muted:rgba(255,255,255,.70);
+      --muted2:rgba(255,255,255,.50);
+
+      --blue:#1f6feb;
+      --green:#16a34a;
+      --green2:#22c55e;
+      --red:#ef4444;
+
+      --shadow: 0 18px 48px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.45);
+      --radius:22px;
+      --radius2:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 520px at 50% -140px, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(850px 540px at 10% 8%, rgba(31,111,235,.12), transparent 55%),
+        radial-gradient(900px 600px at 85% 15%, rgba(34,197,94,.09), transparent 55%),
+        var(--bg);
+      overflow-x:hidden;
+    }
+
+    /* subtle grid */
+    .bg::before{
+      content:"";
+      position:fixed;
+      inset:-60px;
+      pointer-events:none;
+      opacity:.45;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.035) 1px, transparent 1px) 0 0 / 90px 90px,
+        linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 90px 90px;
+      mask: radial-gradient(900px 520px at 50% 0%, #000 55%, transparent 100%);
+    }
+
+    .wrap{
+      width:min(1120px, calc(100% - 48px));
+      margin:0 auto;
+      padding: 22px 0 22px;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* TOP BAR */
+    .topbar{
+      height:62px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding: 0 18px;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius: 18px;
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:260px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:12px;
+      background: radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.35), transparent 55%),
+                  linear-gradient(135deg, rgba(59,130,246,.95), rgba(37,99,235,.85));
+      box-shadow: 0 12px 22px rgba(59,130,246,.18);
+      border:1px solid rgba(255,255,255,.14);
+      position:relative;
+    }
+    .logo::after{
+      content:"";
+      position:absolute;
+      inset:11px 10px 11px 10px;
+      border-radius:10px;
+      border:2px solid rgba(255,255,255,.25);
+      clip-path: polygon(0 55%, 18% 55%, 33% 30%, 47% 76%, 62% 45%, 78% 58%, 100% 58%, 100% 70%, 0 70%);
+      opacity:.9;
+    }
+    .brand-txt{display:flex;flex-direction:column;gap:3px}
+    .brand-title{font-weight:800; font-size:18px; line-height:1.1}
+    .brand-sub{font-size:12px; color:var(--muted2); line-height:1.1}
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex:1;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.25);
+      color:rgba(255,255,255,.86);
+      font-size:13px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      user-select:none;
+    }
+
+    .lang{
+      width:48px;
+      justify-content:center;
+      gap:8px;
+      padding:10px 10px;
+    }
+    .lang .ic{
+      width:18px;height:18px;border-radius:6px;
+      background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.12);
+      display:grid;place-items:center;
+      font-weight:700;
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+    }
+
+    .home{
+      gap:10px;
+      padding-right:14px;
+      border-color: rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+    }
+    .home .homeic{
+      width:16px;height:16px; opacity:.9;
+      display:block;
+    }
+
+    .user{
+      padding-right:14px;
+      gap:10px;
+      border-color: rgba(59,130,246,.35);
+      background: linear-gradient(180deg, rgba(59,130,246,.14), rgba(0,0,0,.22));
+    }
+    .user .avatar{
+      width:28px;height:28px;border-radius:9px;
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.30), transparent 60%),
+        linear-gradient(135deg, rgba(59,130,246,.9), rgba(99,102,241,.8));
+      box-shadow: 0 12px 26px rgba(59,130,246,.18);
+    }
+    .user span{font-weight:600}
+
+    .btn-logout{
+      border:1px solid rgba(239,68,68,.6);
+      background: linear-gradient(180deg, rgba(239,68,68,.16), rgba(0,0,0,.22));
+      color: rgba(255,255,255,.9);
+      padding:10px 14px;
+      border-radius: 12px;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+      box-shadow: 0 12px 24px rgba(239,68,68,.08);
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .btn-logout:hover{transform: translateY(-1px); filter: brightness(1.05)}
+    .btn-logout:active{transform: translateY(0px)}
+
+    /* Tabs row */
+    .tabs{
+      margin-top: 18px;
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,.20);
+      box-shadow: var(--shadow2);
+      padding: 10px 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .tab-row{
+      display:flex;
+      gap: 14px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .tab{
+      flex:1;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: rgba(255,255,255,.78);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .tab svg{width:16px;height:16px; opacity:.9}
+    .tab:hover{background: rgba(255,255,255,.05)}
+    .tab.active{
+      background: linear-gradient(180deg, rgba(22,163,74,.95), rgba(21,128,61,.88));
+      border-color: rgba(34,197,94,.55);
+      color:white;
+      box-shadow: 0 12px 26px rgba(34,197,94,.14);
+    }
+    .tab.dim{opacity:.55}
+
+    /* Main panel */
+    .main{
+      margin-top: 18px;
+      flex:1;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding-bottom: 14px;
+    }
+
+    .panel{
+      width: min(980px, 100%);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(900px 360px at 50% 0%, rgba(255,255,255,.07), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.22));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
+
+    /* header inside panel */
+    .panel-head{
+      padding: 26px 26px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      display:flex;
+      align-items:flex-start;
+      gap: 12px;
+    }
+    .bot-ic{
+      width:22px;height:22px;
+      color: var(--blue);
+      opacity:.95;
+      filter: drop-shadow(0 12px 20px rgba(0,0,0,.45));
+      margin-top: 2px;
+    }
+    .panel-title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .panel-title h2{
+      margin:0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing:.2px;
+    }
+    .panel-title p{
+      margin:0;
+      color: rgba(255,255,255,.58);
+      font-size: 14px;
+    }
+
+    /* chat body */
+    .chat-body{
+      padding: 22px 26px 16px;
+      min-height: 240px;
+    }
+
+    .msg-row{
+      display:flex;
+      gap: 14px;
+      align-items:flex-start;
+    }
+
+    .avatar-bot{
+      width:42px;height:42px;border-radius:999px;
+      background: linear-gradient(180deg, rgba(31,111,235,.95), rgba(30,90,210,.92));
+      border:1px solid rgba(59,130,246,.45);
+      display:grid;
+      place-items:center;
+      box-shadow: 0 16px 30px rgba(31,111,235,.14);
+      flex:0 0 auto;
+      margin-top: 6px;
+    }
+    .avatar-bot svg{width:22px;height:22px; opacity:.95}
+
+    .bubble{
+      max-width: 640px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 14px 28px rgba(0,0,0,.35);
+      padding: 14px 16px 12px;
+      color: rgba(255,255,255,.86);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+    .time{
+      margin-top: 10px;
+      font-size: 11px;
+      color: rgba(255,255,255,.40);
+    }
+
+    /* input area */
+    .chat-input{
+      padding: 16px 26px 18px;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .input-row{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+    }
+
+    .field{
+      flex:1;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.86);
+      padding: 0 14px;
+      outline:none;
+      font-size: 13px;
+    }
+    .field::placeholder{color: rgba(255,255,255,.35)}
+
+    .icon-btn{
+      width:42px;height:42px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.10);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      box-shadow: 0 12px 22px rgba(0,0,0,.35);
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .icon-btn:hover{transform: translateY(-1px); filter: brightness(1.04)}
+    .icon-btn:active{transform: translateY(0px)}
+    .icon-btn svg{width:18px;height:18px; opacity:.95}
+
+    .send{
+      background: linear-gradient(180deg, rgba(31,111,235,.95), rgba(30,90,210,.92));
+      border-color: rgba(59,130,246,.55);
+    }
+    .save{
+      background: linear-gradient(180deg, rgba(34,197,94,.95), rgba(22,163,74,.92));
+      border-color: rgba(34,197,94,.55);
+    }
+
+    .note{
+      margin-top: 10px;
+      color: rgba(255,255,255,.35);
+      font-size: 12px;
+    }
+
+    /* Footer */
+    footer{
+      margin-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 18px 0 8px;
+      text-align:center;
+      color: rgba(255,255,255,.40);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 980px){
+      .wrap{width: calc(100% - 26px);}
+      .topbar{height:auto; padding:12px; flex-wrap:wrap; justify-content:center}
+      .top-actions{justify-content:center; flex-wrap:wrap}
+      .brand{min-width:auto}
+      .panel-head{padding: 22px 18px 16px;}
+      .chat-body{padding: 18px;}
+      .chat-input{padding: 14px 18px 16px;}
+    }
+    @media (max-width: 680px){
+      .tab{font-size:12px}
+      .tab svg{display:none}
+      .panel-title h2{font-size: 20px}
+      .bubble{max-width: 100%}
+    }
+  </style>
+</head>
+
+<body class="bg">
+  <div class="wrap">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="brand-txt">
+          <div class="brand-title">MedAI Assistant</div>
+          <div class="brand-sub">Ваш персональный медицинский помощник</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="pill lang" title="Язык">
+          <div class="ic">A</div>
+          <span style="opacity:.9">🇷🇺</span>
+        </div>
+
+        <div class="pill home" title="На главную">
+          <svg class="homeic" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 10.5 12 3l9 7.5"/>
+            <path d="M5 10v10a1.5 1.5 0 0 0 1.5 1.5H10V15a2 2 0 0 1 4 0v6.5h3.5A1.5 1.5 0 0 0 19 20V10"/>
+          </svg>
+          <span>На главную</span>
+        </div>
+
+        <div class="pill user" title="Пользователь">
+          <div class="avatar" aria-hidden="true"></div>
+          <span>Ramazan Yertayev</span>
+        </div>
+
+        <button class="btn-logout" type="button">logout</button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="tabs" aria-label="Разделы">
+      <div class="tab-row">
+        <button class="tab" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <path d="M7 10l5-5 5 5"/>
+            <path d="M12 5v12"/>
+          </svg>
+          <span>Загрузка</span>
+        </button>
+
+        <button class="tab" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-2h6l2 2h3a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>Фото</span>
+        </button>
+
+        <button class="tab active" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+          </svg>
+          <span>Чат</span>
+        </button>
+
+        <button class="tab dim" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19V6"/>
+            <path d="M20 19V6"/>
+            <path d="M4 12h16"/>
+            <path d="M7 9h.01"/>
+            <path d="M7 15h.01"/>
+          </svg>
+          <span>Результаты</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="main">
+      <section class="panel">
+        <div class="panel-head">
+          <!-- little robot icon -->
+          <svg class="bot-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2v3"/>
+            <path d="M7 6h10"/>
+            <rect x="4" y="7" width="16" height="12" rx="3"/>
+            <path d="M8 12h.01"/>
+            <path d="M16 12h.01"/>
+            <path d="M9 16h6"/>
+          </svg>
+
+          <div class="panel-title">
+            <h2>AI Медицинский ассистент</h2>
+            <p>Задайте вопросы о вашем здоровье</p>
+          </div>
+        </div>
+
+        <div class="chat-body">
+          <div class="msg-row">
+            <div class="avatar-bot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 2v3"/>
+                <path d="M7 6h10"/>
+                <rect x="4" y="7" width="16" height="12" rx="3"/>
+                <path d="M8 12h.01"/>
+                <path d="M16 12h.01"/>
+                <path d="M9 16h6"/>
+              </svg>
+            </div>
+
+            <div class="bubble">
+              Здравствуйте! Я ваш медицинский AI-ассистент. Я могу помочь вам разобраться с результатами анализов, ответить на вопросы о здоровье и дать общие рекомендации. Чем могу помочь?
+              <div class="time">11:39</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input">
+          <div class="input-row">
+            <input class="field" type="text" placeholder="Задайте вопрос о здоровье..." />
+            <button class="icon-btn send" type="button" title="Отправить">
+              <!-- paper plane -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 2 11 13"/>
+                <path d="M22 2 15 22l-4-9-9-4z"/>
+              </svg>
+            </button>
+            <button class="icon-btn save" type="button" title="Сохранить">
+              <!-- save/floppy -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <path d="M17 21v-8H7v8"/>
+                <path d="M7 3v5h8"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="note">AI предоставляет общую информацию и не заменяет медицинскую консультацию</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div>© 2026 MedAI Assistant. Информация предоставлена в ознакомительных целях.</div>
+      <div>При возникновении симптомов обратитесь к врачу. Экстренная помощь: 103, 112</div>
+    </footer>
+  </div>
+</body>
+</html>

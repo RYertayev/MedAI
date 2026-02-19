@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedAI Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#050607;
+      --panel:#0b0d10;
+      --panel2:#0e1014;
+      --border:rgba(255,255,255,.08);
+      --text:#eef2ff;
+      --muted:rgba(255,255,255,.7);
+      --muted2:rgba(255,255,255,.55);
+
+      --blue:#2b7cff;
+      --purple:#8b5cf6;
+      --green:#22c55e;
+      --red:#ef4444;
+
+      --radius:22px;
+      --radius2:18px;
+      --shadow: 0 18px 48px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.45);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(900px 500px at 50% -120px, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(800px 500px at 10% 10%, rgba(59,130,246,.12), transparent 55%),
+        radial-gradient(800px 500px at 90% 20%, rgba(139,92,246,.10), transparent 55%),
+        radial-gradient(900px 600px at 80% 70%, rgba(34,197,94,.08), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    /* subtle background lines */
+    .bg-lines::before{
+      content:"";
+      position:fixed;
+      inset:-40px -40px -40px -40px;
+      pointer-events:none;
+      opacity:.45;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.035) 1px, transparent 1px) 0 0 / 90px 90px,
+        linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 90px 90px;
+      mask: radial-gradient(800px 500px at 50% 0%, #000 55%, transparent 100%);
+    }
+
+    .wrap{
+      width:min(1120px, calc(100% - 48px));
+      margin:0 auto;
+      padding: 22px 0 36px;
+    }
+
+    /* top bar */
+    .topbar{
+      height:62px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding: 0 18px;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius: 18px;
+      box-shadow: var(--shadow2);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 260px;
+    }
+
+    .logo{
+      width:44px;height:44px;border-radius:12px;
+      background: radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.35), transparent 55%),
+                  linear-gradient(135deg, rgba(59,130,246,.95), rgba(37,99,235,.85));
+      box-shadow: 0 12px 22px rgba(59,130,246,.18);
+      position:relative;
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .logo::after{
+      content:"";
+      position:absolute;
+      inset:11px 10px 11px 10px;
+      border-radius:10px;
+      border:2px solid rgba(255,255,255,.25);
+      clip-path: polygon(0 55%, 18% 55%, 33% 30%, 47% 76%, 62% 45%, 78% 58%, 100% 58%, 100% 70%, 0 70%);
+      opacity:.9;
+    }
+
+    .brand-txt{display:flex;flex-direction:column;gap:3px}
+    .brand-title{
+      font-weight:800;
+      letter-spacing:.2px;
+      font-size:18px;
+      line-height:1.1;
+    }
+    .brand-sub{
+      font-size:12px;
+      color:var(--muted2);
+      line-height:1.1;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex:1;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.25);
+      color:rgba(255,255,255,.86);
+      font-size:13px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      user-select:none;
+    }
+
+    .lang{
+      width:48px;
+      justify-content:center;
+      gap:8px;
+      padding:10px 10px;
+    }
+    .lang .ic{
+      width:18px;height:18px;border-radius:6px;
+      background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.12);
+      display:grid;place-items:center;
+      font-weight:700;
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+    }
+
+    .user{
+      padding-right:14px;
+      gap:10px;
+      border-color: rgba(59,130,246,.35);
+      background: linear-gradient(180deg, rgba(59,130,246,.14), rgba(0,0,0,.22));
+    }
+    .user .avatar{
+      width:28px;height:28px;border-radius:9px;
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(16px 16px at 30% 30%, rgba(255,255,255,.30), transparent 60%),
+        linear-gradient(135deg, rgba(59,130,246,.9), rgba(99,102,241,.8));
+      box-shadow: 0 12px 26px rgba(59,130,246,.18);
+    }
+    .user span{font-weight:600}
+
+    .btn-logout{
+      border:1px solid rgba(239,68,68,.6);
+      background: linear-gradient(180deg, rgba(239,68,68,.16), rgba(0,0,0,.22));
+      color: rgba(255,255,255,.9);
+      padding:10px 14px;
+      border-radius: 12px;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+      box-shadow: 0 12px 24px rgba(239,68,68,.08);
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .btn-logout:hover{transform: translateY(-1px); filter: brightness(1.05)}
+    .btn-logout:active{transform: translateY(0px)}
+
+    /* hero */
+    .hero{
+      text-align:center;
+      padding: 58px 12px 26px;
+    }
+    .hero h1{
+      margin:0;
+      font-size: 44px;
+      letter-spacing: .2px;
+      font-weight: 800;
+      line-height: 1.08;
+      text-shadow: 0 18px 40px rgba(0,0,0,.55);
+    }
+    .hero p{
+      margin: 16px auto 0;
+      max-width: 780px;
+      color: rgba(255,255,255,.72);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    /* cards row */
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-top: 24px;
+    }
+
+    .card{
+      position:relative;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(500px 240px at 20% 10%, rgba(255,255,255,.08), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-height: 230px;
+      padding: 22px 22px 18px;
+      backdrop-filter: blur(12px);
+    }
+
+    .card::after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(600px 260px at 15% 0%, rgba(255,255,255,.10), transparent 60%);
+      pointer-events:none;
+      opacity:.55;
+    }
+
+    .card .icon{
+      width:66px;height:66px;border-radius:18px;
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 14px 32px rgba(0,0,0,.45);
+      margin-bottom: 18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .card h3{
+      margin:0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing:.2px;
+      position:relative;
+      z-index:1;
+    }
+    .card p{
+      margin: 10px 0 0;
+      color: rgba(255,255,255,.68);
+      line-height: 1.55;
+      font-size: 13px;
+      max-width: 92%;
+      position:relative;
+      z-index:1;
+    }
+
+    .card .cta{
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      cursor:pointer;
+      position:relative;
+      z-index:1;
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .card .cta:hover{transform: translateY(-1px); filter: brightness(1.04)}
+    .card .cta:active{transform: translateY(0px)}
+
+    .card.blue{
+      background:
+        radial-gradient(520px 280px at 15% 10%, rgba(59,130,246,.22), transparent 58%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
+    }
+    .card.purple{
+      background:
+        radial-gradient(520px 280px at 15% 10%, rgba(139,92,246,.22), transparent 58%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
+    }
+    .card.green{
+      background:
+        radial-gradient(520px 280px at 15% 10%, rgba(34,197,94,.20), transparent 58%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.18));
+    }
+
+    .blue .icon{ background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(37,99,235,.85)); }
+    .purple .icon{ background: linear-gradient(135deg, rgba(139,92,246,.95), rgba(124,58,237,.85)); }
+    .green .icon{ background: linear-gradient(135deg, rgba(34,197,94,.95), rgba(16,185,129,.80)); }
+
+    .blue .cta{
+      background: linear-gradient(180deg, rgba(43,124,255,.95), rgba(37,99,235,.92));
+      border-color: rgba(59,130,246,.55);
+      color:white;
+      box-shadow: 0 16px 30px rgba(59,130,246,.18);
+    }
+    .purple .cta{
+      background: linear-gradient(180deg, rgba(139,92,246,.95), rgba(124,58,237,.92));
+      border-color: rgba(139,92,246,.55);
+      color:white;
+      box-shadow: 0 16px 30px rgba(139,92,246,.18);
+    }
+    .green .cta{
+      background: linear-gradient(180deg, rgba(34,197,94,.95), rgba(22,163,74,.92));
+      border-color: rgba(34,197,94,.55);
+      color:white;
+      box-shadow: 0 16px 30px rgba(34,197,94,.16);
+    }
+
+    /* simple inline icons */
+    .svg{width:28px;height:28px;opacity:.95; filter: drop-shadow(0 10px 20px rgba(0,0,0,.35));}
+
+    /* info panel */
+    .info{
+      margin-top: 26px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(800px 320px at 15% 0%, rgba(255,255,255,.08), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.22));
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display:grid;
+      grid-template-columns: 86px 1fr;
+      gap: 18px;
+      align-items:start;
+      backdrop-filter: blur(12px);
+    }
+
+    .docimg{
+      width:86px;height:86px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      overflow:hidden;
+      background:
+        radial-gradient(24px 24px at 25% 30%, rgba(255,255,255,.22), transparent 60%),
+        linear-gradient(135deg, rgba(120,120,120,.55), rgba(40,40,40,.65));
+      box-shadow: 0 16px 34px rgba(0,0,0,.45);
+      position:relative;
+    }
+    .docimg::after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(50px 50px at 20% 20%, rgba(255,255,255,.18), transparent 60%);
+    }
+
+    .info h4{
+      margin:0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing:.2px;
+    }
+    .info p{
+      margin: 10px 0 0;
+      color: rgba(255,255,255,.68);
+      line-height: 1.65;
+      font-size: 13px;
+      max-width: 920px;
+    }
+
+    .stats{
+      margin-top: 18px;
+      display:flex;
+      gap: 24px;
+      align-items:flex-end;
+      flex-wrap:wrap;
+    }
+    .stat{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width: 92px;
+    }
+    .stat .num{
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing:.3px;
+      color: rgba(59,130,246,.95);
+      text-shadow: 0 14px 30px rgba(59,130,246,.18);
+    }
+    .stat .lbl{
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+    }
+
+    /* footer */
+    footer{
+      margin-top: 34px;
+      padding: 18px 0 0;
+      text-align:center;
+      color: rgba(255,255,255,.45);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* responsiveness */
+    @media (max-width: 980px){
+      .cards{grid-template-columns: 1fr; gap:16px;}
+      .hero{padding-top: 44px;}
+      .hero h1{font-size: 36px;}
+      .brand{min-width:auto}
+      .topbar{height:auto; padding: 12px; flex-wrap:wrap; justify-content:center}
+      .top-actions{justify-content:center; flex-wrap:wrap}
+    }
+    @media (max-width: 520px){
+      .wrap{width: calc(100% - 26px);}
+      .hero h1{font-size: 30px;}
+      .info{grid-template-columns: 1fr; }
+      .docimg{width:74px;height:74px}
+    }
+  </style>
+</head>
+
+<body class="bg-lines">
+  <div class="wrap">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="brand-txt">
+          <div class="brand-title">MedAI Assistant</div>
+          <div class="brand-sub">Ваш персональный медицинский помощник</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="pill lang" title="Язык">
+          <div class="ic">A</div>
+          <span style="opacity:.9">🇷🇺</span>
+        </div>
+
+        <div class="pill user" title="Пользователь">
+          <div class="avatar" aria-hidden="true"></div>
+          <span>Ramazan Yertayev</span>
+        </div>
+
+        <button class="btn-logout" type="button">logout</button>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1>Анализ здоровья с помощью ИИ</h1>
+      <p>
+        Загрузите результаты анализов или сделайте фото для получения<br>
+        персональных рекомендаций. Общайтесь с AI-ассистентом для ответов на<br>
+        ваши вопросы.
+      </p>
+    </section>
+
+    <!-- Feature cards -->
+    <section class="cards">
+      <!-- Upload -->
+      <article class="card blue">
+        <div class="icon" aria-hidden="true">
+          <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <path d="M7 10l5-5 5 5"/>
+            <path d="M12 5v12"/>
+          </svg>
+        </div>
+        <h3>Загрузка анализов</h3>
+        <p>Загрузите фото или скан бланка с результатами анализов для автоматической расшифровки</p>
+        <button class="cta" type="button" onclick="window.location.href='upload.html'">Загрузить файл</button>
+      </article>
+
+      <!-- Photo -->
+      <article class="card purple">
+        <div class="icon" aria-hidden="true">
+          <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3l2-2h6l2 2h3a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
+        <h3>Фото-анализ</h3>
+        <p>Сделайте фото для визуальной оценки состояния здоровья и обнаружения тревожных признаков</p>
+        <button class="cta" type="button" onclick="window.location.href='camera.html'">Сделать фото</button>
+      </article>
+
+      <!-- Chat -->
+      <article class="card green">
+        <div class="icon" aria-hidden="true">
+          <svg class="svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+          </svg>
+        </div>
+        <h3>AI Консультация</h3>
+        <p>Задайте вопросы о здоровье, симптомах или получите разъяснения по результатам анализов</p>
+        <button class="cta" type="button">Начать чат</button>
+      </article>
+    </section>
+
+    <!-- Info panel -->
+    <section class="info">
+      <div class="docimg" aria-hidden="true"></div>
+      <div>
+        <h4>Важная информация</h4>
+        <p>
+          Наш AI-ассистент предоставляет общую информацию и рекомендации, основанные на анализе данных.
+          Это не заменяет профессиональную медицинскую консультацию, диагностику или лечение.
+          При серьезных симптомах или ухудшении состояния немедленно обратитесь к врачу или вызовите скорую помощь.
+        </p>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="num">24/7</div>
+            <div class="lbl">Доступность</div>
+          </div>
+          <div class="stat">
+            <div class="num">99%</div>
+            <div class="lbl">Точность</div>
+          </div>
+          <div class="stat">
+            <div class="num">5s</div>
+            <div class="lbl">Анализ</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>© 2026 MedAI Assistant. Информация предоставлена в ознакомительных целях.</div>
+      <div>При возникновении симптомов обратитесь к врачу. Экстренная помощь: 103, 112</div>
+    </footer>
+  </div>
+</body>
+</html>
